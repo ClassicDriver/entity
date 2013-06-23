@@ -1269,7 +1269,7 @@ function _entity_info_add_metadata(&$entity_info) {
   $entity_info['user']['form callback'] = 'entity_metadata_form_user';
 
   // View callbacks.
-  $entity_info['node']['view callback'] = 'entity_metadata_view_node';
+  $entity_info['node']['view callback'] = 'performance_hacks_entity_metadata_view_node';
   $entity_info['user']['view callback'] = 'entity_metadata_view_single';
 
   if (module_exists('comment')) {
