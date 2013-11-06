@@ -109,9 +109,10 @@ function entity_token_token_info_alter(&$info) {
         foreach ($property['property info'] as $key => $property_info) {
           $help[] = $key . ' (' . $property_info['label'] . ')';
         }
-        $info['tokens'][$token_type][$name]['description'] .= ' ' . t('The following properties may be appended to the token: @keys',
+        /*$info['tokens'][$token_type][$name]['description'] .= ' ' . t('The following properties may be appended to the token: @keys',
           array('@keys' => implode(', ', $help))
-        );
+        );*/
+        $info['tokens'][$token_type][$name]['description'] .= ' The following properties may be appended to the token: ' . implode(', ', $help);
       }
     }
   }
@@ -123,14 +124,16 @@ function entity_token_token_info_alter(&$info) {
       if (isset($entity_info[$type])) {
         $info['types'][$token_type] = array(
           'name' => $entity_info[$type]['label'],
-          'description' => t('Tokens related to the "@name" entities.', array('@name' => $entity_info[$type]['label'])),
+          //'description' => t('Tokens related to the "@name" entities.', array('@name' => $entity_info[$type]['label'])),
+        'description' => 'Tokens related to the "' . $entity_info[$type]['label'] .'" entities.',
           'needs-data' => $token_type,
         );
       }
       else {
         $info['types'][$token_type] = array(
           'name' => drupal_strtoupper($token_type),
-          'description' => t('@name tokens.', array('@name' => drupal_strtoupper($token_type))),
+          //'description' => t('@name tokens.', array('@name' => drupal_strtoupper($token_type))),
+          'description' => drupal_strtoupper($token_type) . ' tokens.',
           'needs-data' => $token_type,
         );
       }
@@ -138,23 +141,29 @@ function entity_token_token_info_alter(&$info) {
     if (!empty($info['tokens'][$token_type]) && !isset($info['types']["list<$token_type>"]) && $token_type != 'site') {
       if (isset($entity_info[$type])) {
         $info['types']["list<$token_type>"] = array(
-          'name' => t('List of @entities', array('@entities' => isset($entity_info[$type]['plural label']) ? $entity_info[$type]['plural label'] : $entity_info[$type]['label'] . 's')),
-          'description' => t('Tokens related to the "@name" entities.', array('@name' => $entity_info[$type]['label'])),
+          //'name' => t('List of @entities', array('@entities' => isset($entity_info[$type]['plural label']) ? $entity_info[$type]['plural label'] : $entity_info[$type]['label'] . 's')),
+          'name' => 'List of ' . $entity_info[$type]['label'],
+          //'description' => t('Tokens related to the "@name" entities.', array('@name' => $entity_info[$type]['label'])),
+         'description' => 'Tokens related to the "' . $entity_info[$type]['label'] . '" entities.',
           'needs-data' => "list<$token_type>",
         );
       }
       else {
         $info['types']["list<$token_type>"] = array(
-          'name' => t('List of @type values', array('@type' => $token_type)),
-          'description' => t('Tokens for lists of @type values.', array('@type' => $token_type)),
+          //'name' => t('List of @type values', array('@type' => $token_type)),
+          'name' => 'List of ' . $token_type . ' values',
+          //'description' => t('Tokens for lists of @type values.', array('@type' => $token_type)),
+          'description' => 'Tokens for lists of ' . $token_type . ' values.',
           'needs-data' => "list<$token_type>",
         );
       }
       // Also add some basic token replacements for lists...
       for ($i = 0; $i < 4; $i++) {
         $info['tokens']["list<$token_type>"][$i] = array(
-          'name' => t('@type with delta @delta', array('@delta' => $i, '@type' => $info['types'][$token_type]['name'])),
-          'description' => t('The list item with delta @delta. Delta values start from 0 and are incremented by one per list item.', array('@delta' => $i)),
+          //'name' => t('@type with delta @delta', array('@delta' => $i, '@type' => $info['types'][$token_type]['name'])),
+          'name' => $info['types'][$token_type]['name'] . ' with delta ' . $i,
+          //'description' => t('The list item with delta @delta. Delta values start from 0 and are incremented by one per list item.', array('@delta' => $i)),
+          'description' => 'The list item with delta ' . $i . '. Delta values start from 0 and are incremented by one per list item.',
           'type' => $token_type,
         );
       }
