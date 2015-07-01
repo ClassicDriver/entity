@@ -221,15 +221,17 @@ class EntityAPIController extends DrupalDefaultEntityController implements Entit
         if (!empty($this->entityInfo['base table'])) {
           $schema = drupal_get_schema($this->entityInfo['base table']);
 
-          foreach ($schema['fields'] as $field => $info) {
-            if (!empty($info['serialize']) && isset($record->$field)) {
-              $record->$field = unserialize($record->$field);
-              // Support automatic merging of 'data' fields into the entity.
-              if (!empty($info['merge']) && is_array($record->$field)) {
-                foreach ($record->$field as $key => $value) {
-                  $record->$key = $value;
+          if (is_array($schema) && isset($schema['fields']) && is_array($schema['fields'])) {
+            foreach ($schema['fields'] as $field => $info) {
+              if (!empty($info['serialize']) && isset($record->$field)) {
+                $record->$field = unserialize($record->$field);
+                // Support automatic merging of 'data' fields into the entity.
+                if (!empty($info['merge']) && is_array($record->$field)) {
+                  foreach ($record->$field as $key => $value) {
+                    $record->$key = $value;
+                  }
+                  unset($record->$field);
                 }
-                unset($record->$field);
               }
             }
           }
@@ -621,8 +623,17 @@ class EntityAPIControllerExportable extends EntityAPIController {
     if ($conditions) {
       foreach ($entities as $key => $entity) {
         $entity_values = (array) $entity;
-        if (array_diff_assoc($conditions, $entity_values)) {
-          unset($entities[$key]);
+        // We cannot use array_diff_assoc() here because condition values can
+        // also be arrays, e.g. '$conditions = array('status' => array(1, 2))'
+        foreach ($conditions as $condition_key => $condition_value) {
+          if (is_array($condition_value)) {
+            if (!isset($entity_values[$condition_key]) || !in_array($entity_values[$condition_key], $condition_value)) {
+              unset($entities[$key]);
+            }
+          }
+          elseif (!isset($entity_values[$condition_key]) || $entity_values[$condition_key] != $condition_value) {
+            unset($entities[$key]);
+          }
         }
       }
     }
